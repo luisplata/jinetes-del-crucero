@@ -64,13 +64,13 @@ public class JoseController : MonoBehaviour {
         Movimiento ();
     }
     private void Movimiento () {
-        if (!mover) {
-            return;
-        }
         if (Input.GetKeyDown (KeyCode.Joystick1Button3) || Input.GetKeyDown (KeyCode.Z)) {
             an.SetTrigger ("golpeSuave");
         } else if (Input.GetKeyDown (KeyCode.Joystick1Button2) || Input.GetKeyDown (KeyCode.X)) {
             an.SetTrigger ("golpeDuro");
+        }
+        if (!mover) {
+            return;
         }
         xMov = Input.GetAxis ("Horizontal") * speed;
 

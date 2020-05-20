@@ -4,18 +4,15 @@ using UnityEngine;
 
 public class ControladorDePausaJuego : MonoBehaviour {
     // Start is called before the first frame update
-    void Start () {
-
-    }
 
     private bool isPausa = true;
     public GameObject jugador;
     public GameObject camara1, camara2, pausa;
     // Update is called once per frame
     void Update () {
-        if ((Input.GetKeyDown (KeyCode.Escape) || Input.GetKeyDown (KeyCode.Joystick1Button9)) && isPausa) {
+        if ((Input.GetKeyDown (KeyCode.C) || Input.GetKeyDown (KeyCode.Joystick1Button9)) && isPausa) {
             Pausar ();
-        } else if ((Input.GetKeyDown (KeyCode.Escape) || Input.GetKeyDown (KeyCode.Joystick1Button9)) && !isPausa) {
+        } else if ((Input.GetKeyDown (KeyCode.C) || Input.GetKeyDown (KeyCode.Joystick1Button9)) && !isPausa) {
             Reanudar ();
         }
     }

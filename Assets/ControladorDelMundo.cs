@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ControladorDelMundo : MonoBehaviour {
     // Start is called before the first frame update
     [SerializeField]
     private int cantidadDeEnemigos, enemigosSpwneados, enemigosEliminados = 0; //cantidad de enemigos en pantalla
 
-    public GameObject camara1, camara2;
+    public GameObject camara1, camara2, marcador, enemigos, contadorParaNuevaOleada;
     float deltaTime = 0;
 
     //1,2,4,8,16,32,64,128,256,512//Por ahora
@@ -54,9 +55,9 @@ public class ControladorDelMundo : MonoBehaviour {
     //sumar y restar a la variable de enemigos para saber cuantos enemigos hay en pantalla
     //sumatoria de los enemigos y compararla con cantidadDeEnemigosPorOleada[this.oleada] para saber si me detengo o no en el spawn
     private void Update () {
-        if ((Input.GetKeyDown (KeyCode.Escape) || Input.GetKeyDown (KeyCode.Joystick1Button9)) && isPausa) {
+        if ((Input.GetKeyDown (KeyCode.C) || Input.GetKeyDown (KeyCode.Joystick1Button9)) && isPausa) {
             Pausar ();
-        } else if ((Input.GetKeyDown (KeyCode.Escape) || Input.GetKeyDown (KeyCode.Joystick1Button9)) && !isPausa) {
+        } else if ((Input.GetKeyDown (KeyCode.C) || Input.GetKeyDown (KeyCode.Joystick1Button9)) && !isPausa) {
             Reanudar ();
         }
         //controlamos las nuevas oleadas
@@ -66,7 +67,7 @@ public class ControladorDelMundo : MonoBehaviour {
         }
         deltaTime += Time.deltaTime;
         if (!primerEnemigo) {
-
+            Debug.Log ("rangoDeTiempoParaSpawnear " + rangoDeTiempoParaSpawnear);
             if (deltaTime >= rangoDeTiempoParaSpawnear) {
                 if (!isCalmado) {
                     rangoDeTiempoParaSpawnear = Random.Range (0, 7);
@@ -77,12 +78,12 @@ public class ControladorDelMundo : MonoBehaviour {
                     deltaTime = 0;
                 } else {
                     //aqui termina la musica de descanzo
-                    isCalmado = false;
+                    //isCalmado = false;
                 }
             }
         }
         //ahora necesitamos estar verificando los enemigos y cuandos faltan
-        if (cantidadDeEnemigos > 0) {
+        if ((cantidadDeEnemigosPorOleada[this.oleada] - enemigosEliminados) > 0 || primerEnemigo) {
             //aun hay enemigos en la escena
             isNuevaOleada = true;
         } else {
@@ -96,7 +97,12 @@ public class ControladorDelMundo : MonoBehaviour {
     }
     public void Pausar () {
         Debug.Log (jugador.GetComponent<SpriteRenderer> ().sprite.name);
-        int index = int.Parse (jugador.GetComponent<SpriteRenderer> ().sprite.name.Split ('_') [1]); //si no lo combirte esposible que sea los sprinte de caminar
+        int index;
+        if (jugador.GetComponent<SpriteRenderer> ().sprite.name.Split ('_').Length <= 1) {
+            index = 1;
+        } else {
+            index = int.Parse (jugador.GetComponent<SpriteRenderer> ().sprite.name.Split ('_') [1]); //si no lo combirte esposible que sea los sprinte de caminar
+        }
         string indexString = index < 10 ? "0" + index.ToString () : index.ToString ();
         //ahora colocamos random la cara
         int randomCara = Random.Range (1, 4);
@@ -141,7 +147,9 @@ public class ControladorDelMundo : MonoBehaviour {
             SceneManager.LoadScene ("Creditos");
         }
         //aqui comienza la musica de descanzo
-        isCalmado = true;
+        StartCoroutine ("HacerPalpitarMarcador");
+        //isCalmado = true;
+        //StartCoroutine ("ContadorParaNuevaOleada");
         oleada++;
         //ahora colocamos en la GUI la oleada
         uIController.ActualizarOleada ();
@@ -149,6 +157,7 @@ public class ControladorDelMundo : MonoBehaviour {
         enemigosEliminados = 0;
         enemigosSpwneados = 0;
         rangoDeTiempoParaSpawnear = 7;
+        cantidadDeEnemigos = cantidadDeEnemigosPorOleada[this.oleada];
     }
 
     public int EnemigosFaltantes () {
@@ -159,10 +168,11 @@ public class ControladorDelMundo : MonoBehaviour {
     }
 
     public void SpawnEnemigo () {
-        cantidadDeEnemigos++;
         AumentoDeEnemigo ();
     }
     public void MuereEnemigo () {
+        StartCoroutine ("HacerPalpitarMarcadorEnemigos");
+        enemigosSpwneados--;
         cantidadDeEnemigos--;
         enemigosEliminados++;
         uIController.ActualizarEnemigos (cantidadDeEnemigosPorOleada[this.oleada] - enemigosEliminados);
@@ -180,7 +190,45 @@ public class ControladorDelMundo : MonoBehaviour {
     }
 
     public void Salir () {
-        Application.Quit ();
+        //lo mandamos a la pantalla de menu
+        //Application.Quit ();
+        SceneManager.LoadScene ("Menu");
+    }
+
+    IEnumerator HacerPalpitarMarcador () {
+        for (int i = 0; i < 10; i++) {
+            marcador.GetComponent<Image> ().color = i % 2 == 0 ? Color.red : Color.white;
+            yield return new WaitForSeconds (0.1f);
+        }
+    }
+
+    IEnumerator HacerPalpitarMarcadorEnemigos () {
+        for (int i = 0; i < 10; i++) {
+            enemigos.GetComponent<Image> ().color = i % 2 == 0 ? Color.red : Color.white;
+            yield return new WaitForSeconds (0.05f);
+        }
+    }
+
+    IEnumerator ContadorParaNuevaOleada () {
+        isCalmado = true;
+        PrenderContador ();
+        for (int i = 6; i > 0; i--) {
+            UpDateContador (i.ToString ());
+            yield return new WaitForSeconds (1);
+        }
+        ApagarContador ();
+        isCalmado = false;
+    }
+
+    public void UpDateContador (string numero) {
+        contadorParaNuevaOleada.GetComponent<TextMeshProUGUI> ().text = numero;
+    }
+
+    public void PrenderContador () {
+        contadorParaNuevaOleada.SetActive (true);
+    }
+    public void ApagarContador () {
+        contadorParaNuevaOleada.SetActive (false);
     }
 
 }
