@@ -141,6 +141,11 @@ public class ControladorDelMundo : MonoBehaviour {
         SceneManager.LoadScene ("Game");
     }
 
+    public void SalirDeGame () {
+        Time.timeScale = 1;
+        SceneManager.LoadScene ("Menu");
+    }
+
     public void NuevaOleada () {
         //verificamos que si termina la oleada 10, mandarlo a la pantalla de 
         if (oleada == 10) {
