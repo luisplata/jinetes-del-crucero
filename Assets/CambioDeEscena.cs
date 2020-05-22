@@ -5,13 +5,18 @@ using UnityEngine.SceneManagement;
 
 public class CambioDeEscena : MonoBehaviour {
     //Cambio de Escena
+    public GameObject creditos, textos;
     public void CambioDeEscenaJuego () {
         SceneManager.LoadScene ("Intro");
     }
 
-    public GameObject creditos;
     public void ColocandoCreditos () {
-        GetComponent<Animator> ().SetTrigger ("salir");
-        creditos.setActive (true);
+        creditos.SetActive (true);
+
+        textos.transform.position = new Vector3 (266, -220, 0);
+    }
+
+    public void PlayMusic () {
+        GetComponent<AudioSource> ().Play ();
     }
 }
